@@ -29,5 +29,18 @@ function tryMoveDown()
     end
   else
     print("BedRock or other indestructable block located")
+    return false
+  end
+end
+function tryDigForward()
+  local digBlock = true
+  if(turtle.detect()) then
+    for(i=1, ignoreCount) do
+      turtle.select(i)
+      if(turtle.compare()) then
+        digBlock = false
+        break
+      end
+    end
   end
 end
