@@ -1,0 +1,33 @@
+--This is a program for "bunny hole mining" aka efficient ore finder.
+
+tArgs = {...} //fetches argument list.
+
+local ignoreCount = tonumber(tArg[1])
+
+function tryDigDown()
+  if(turtle.detectDown()) then
+    turtle.digDown()
+    if(turtle.detectDown) then
+      return true
+    else
+      return false
+    end
+  end
+end
+function tryMoveDown()
+  if(tryDigDown()) then
+    if(turtle.moveDown()) then
+      return true
+    else
+      if(turtle.getFuelLevel() > 0) then
+        print("Unknown error, Move Unsuccessfull")
+        return false
+      else
+        print("Turtle Requires more Fuel")
+        return false
+      end
+    end
+  else
+    print("BedRock or other indestructable block located")
+  end
+end
