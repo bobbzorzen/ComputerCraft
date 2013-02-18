@@ -4,16 +4,30 @@ tArgs = {...} //fetches argument list.
 
 local ignoreCount = tonumber(tArg[1])
 
+function tryRefuel()
+  local itemCount = 0
+  local returnValue = false
+  turtle.select(16)
+  itemCount = turtle.getItemCount(16)
+  itemCount = itemCount -1
+  if(itemCount ~= 0) then
+    turtle.refuel(itemCount)
+    returnValue = true
+  end
+  return returnValue
+end
+
 function tryDigDown()
   if(turtle.detectDown()) then
     turtle.digDown()
     if(turtle.detectDown) then
-      return true
-    else
       return false
+    else
+      return true
     end
   end
 end
+
 function tryMoveDown()
   if(tryDigDown()) then
     if(turtle.moveDown()) then
@@ -23,7 +37,12 @@ function tryMoveDown()
         print("Unknown error, Move Unsuccessfull")
         return false
       else
-        print("Turtle Requires more Fuel")
+        print("Turtle Requires more Fuel! Trying to refuel!")
+        if(tryRefuel()) then
+          print("Refuel successfull!")
+        else
+          print("Refuel UNSUCCESSFULL")
+        end
         return false
       end
     end
@@ -32,6 +51,7 @@ function tryMoveDown()
     return false
   end
 end
+
 function tryDigForward()
   local digBlock = true
   if(turtle.detect()) then
@@ -42,5 +62,53 @@ function tryDigForward()
         break
       end
     end
+    turtle.select(16)
+    if(turtle.compare()) then
+      turtle.dig()
+      return true
+    end
+    if(digBlock) then
+      turtle.dig()
+    end
+  end
+  return digBlock
+end
+
+function reposition()
+  turtle.dig()
+  turtle.forward()
+  turtle.dig()
+  turtle.forward()
+  turtle.turnRight()
+  turtle.dig()
+  turtle.forward()
+  turtle.turnLeft()
+end
+
+local continue = true
+local depthCount = 0
+tryMoveDown()
+tryMoveDown()
+depthCount = 2
+turtle.select(1)
+turtle.placeUp()
+while(continue) do
+  for i = 1, 4 do
+    tryDigForward()
+    turtle.turnLeft()
+  end
+  if(not tryDigDown()) then
+    continue = false
   end
 end
+
+while(depthCount ~= 0) then
+  turtle.up()
+  depthCount = depthCount + 1
+  if(depthCount == 2) then
+    turtle.digUp()
+  end
+end
+turtle.select(1)
+turtle.placeDown()
+reposition()
