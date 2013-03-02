@@ -1,0 +1,56 @@
+--Fetches argument list
+tArgs = {...}
+ 
+--Stores arguments as numbers
+local width = tonumber(tArgs[1])
+local height = tonumber(tArgs[2])
+local depth = tonumber(tArgs[3])
+ 
+--creates an alternator bool to keep track of movements
+local alternator = true
+ 
+function tryMoveForward()
+        while not turtle.forward() do
+                turtle.dig()
+        end
+end
+function tryMoveUp()
+        while not turtle.up() do
+                turtle.digUp()
+        end
+end
+print("width: "..width)
+print("height: "..height)
+print("depth: "..depth)
+ 
+tryMoveForward()
+turtle.turnRight()
+for z=1,depth do
+        for x=1,width do
+                for y=1,(height-1) do
+                        if alternator then
+                                print("Going: up")
+                                tryMoveUp()
+                        else
+                                print("Going: down")
+                                turtle.digDown()
+                                turtle.down()
+                        end
+                end
+                if x%width ~= 0 then
+                        tryMoveForward()
+                end
+                alternator = not alternator
+        end
+        if z%depth ~= 0 then
+                if z%2 == 0 then
+                        turtle.turnRight()
+                        tryMoveForward()
+                        turtle.turnRight()
+                else
+                        turtle.turnLeft()
+                        tryMoveForward()
+                        turtle.turnLeft()
+                end
+        end
+end
