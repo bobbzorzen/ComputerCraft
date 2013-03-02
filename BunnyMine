@@ -1,65 +1,80 @@
 tArgs = {...}
- 
+
+function digRound(ignoreList)
+ local dig = true
+	for i=1,4 do
+		dig = true
+		for j=1,ignoreList do
+			turtle.select(j)
+			if turtle.compare() then
+				dig = false
+			end
+		end
+		if dig then
+			turtle.dig()
+		end
+		turtle.turnRight()
+	end
+end
+function tryMoveForward()
+	while not turtle.forward() do
+		turtle.dig()
+	end
+end
+function tryDigDown()
+	turtle.select(1)
+	if not turtle.digDown() then
+		if turtle.detectDown() then
+			return false
+		end
+	end
+	return true
+end
+function tryMoveUp()
+	while not turtle.up() do
+		turtle.digUp()
+	end
+end
+function reposition()
+	tryMoveForward()
+	tryMoveForward()
+	turtle.turnRight()
+	tryMoveForward()
+	turtle.turnLeft()
+end
+
+-- MAIN PROGRAM STARTS HERE --
+
 ignoreCount = tArgs[1]
 local depthCounter = 0
 local notDone = true
-function digRound(ignoreList)
-        local dig = true
-        for i=1,4 do
-                dig = true
-                for j=1,ignoreList do
-                        turtle.select(j)
-                        if turtle.compare() then
-                                dig = false
-                        end
-                end
-                if dig then
-                        turtle.dig()
-                end
-                turtle.turnRight()
-        end
-end
-function tryMoveForward()
-        if turtle.detect() then
-                turtle.dig()
-        end
-        turtle.forward()
-end
-function tryDigDown()
-        turtle.select(1)
-        if not turtle.digDown() then
-                if turtle.detectDown() then
-                        return false
-                end
-        end
-        return true
-end
- 
-function reposition()
-        tryMoveForward()
-        tryMoveForward()
-        turtle.turnRight()
-        tryMoveForward()
-        turtle.turnLeft()
-end
- 
- 
+
+
 turtle.digDown()
 turtle.down()
- 
+turtle.digDown()
+turtle.down()
+turtle.select(1)
+turtle.placeUp()
 while notDone do
-        if not tryDigDown() then
-                notDone = false
-        end
-        turtle.down()
-        digRound(ignoreCount)
-        depthCounter = depthCounter + 1
+	if not tryDigDown() then
+		notDone = false
+	end
+	turtle.down()
+	digRound(ignoreCount)
+	depthCounter = depthCounter + 1
 end
- 
+turtle.up()
+turtle.up()
+turtle.up()
+depthCounter = depthCounter-3
+reposition()
 for i=1,depthCounter do
-        turtle.up()
+	digRound(ignoreCount)
+	tryMoveUp()
 end
- 
+turtle.up()
+
 turtle.select(1)
 turtle.placeDown()
 reposition()
