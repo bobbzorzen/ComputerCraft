@@ -1,0 +1,176 @@
+--HOW DOES IT WORK?
+--Start by placing the turtle at the rightmost tree in the first row of your farm.
+--You place the type of wood that is beeing farmed(for example, birchwood or oak wood) in slot nr one(1)
+--You then place the saplings of that tree in slot nr sixteen(16)
+--Any fuel you want goes in slot nr 2, note that if this slot is empty the wood that is beeing logged will become fuel.
+
+--Start program by typing: name_of_file <nr of rows in farm> <nr of trees per row> <nr of blocks between trees>
+--Example: 
+--@ = tree
+--# = empty block
+--@###@###@
+--#########
+--#########
+--#########
+--@###@###@
+--#########
+--#########
+--#########
+--@###@###@
+--#########
+--#########
+--#########
+--this is a farm with 3 trees/row 3 rows and a distance between trees of 3
+--it's executed as follows: name_of_file 3 3 3
+
+--Hope it will work as good for you as it does for me :D
+-- Created by: Bobbzorzen
+
+
+blocksMined = 0;
+
+
+--FUEL CHECK SCRIPT
+function fuelCheck()
+  if(turtle.getFuelLevel() <= 10) then
+    turtle.select(2)
+    turtle.refuel(1)
+    turtle.select(1)
+    print("Refueled!")
+    print("current fuel level: "..turtle.getFuelLevel())
+  end
+end
+
+--LOG SCRIPT
+function log()
+  turtle.select(2)
+  turtle.dig()
+  blocksMined = blocksMined+1
+  turtle.forward()
+  while(turtle.compareUp(1)) do
+    fuelCheck()
+    turtle.digUp()
+    blocksMined = blocksMined+1
+    turtle.up()
+  end
+
+  while(not turtle.detectDown()) do
+    fuelCheck()
+    turtle.down()
+  end
+
+  turtle.back()
+  turtle.select(16)
+  turtle.place()
+  turtle.select(1)
+end
+ 
+ --LOGROW SCRIPT
+ function nextTree(arg2)
+  turtle.turnRight()
+  for i= 1, arg2+1 do
+    fuelCheck()
+    turtle.forward()
+  end
+  turtle.turnLeft()
+end
+function checkAndCut()
+  turtle.select(1)
+  if turtle.compare() then
+    log()
+  end
+end
+function logRow(arg1, arg2)
+  --Logs all trees in current row
+  for i = 1, arg1-1 do
+    checkAndCut()
+    nextTree(arg2)
+  end
+  checkAndCut()
+
+  --return to first tree
+  local rowLength = (arg1-1)*(arg2+1)
+  turtle.turnLeft()
+  for i=1,rowLength do
+    fuelCheck()
+    turtle.forward()
+  end
+  turtle.turnRight()
+end
+
+--FARM SCRIPT 
+tArgs = {...}
+function unloadAndResuply(rows,trees)
+  local nrOfTrees = (rows*trees)
+  turtle.back()
+  turtle.turnRight()
+  for i=3,15 do
+    turtle.select(i)
+    turtle.drop()
+  end
+  turtle.turnRight()
+  turtle.select(16)
+  turtle.drop()
+  turtle.suck()
+  turtle.select(2)
+  turtle.turnLeft()
+  turtle.turnLeft()
+  turtle.forward()
+end
+
+--Return turtle to starting position
+function goBack(arg1, arg2)
+  turtle.turnLeft()
+  turtle.forward()
+  turtle.turnLeft()
+  for i = 1,((arg1-1)*(arg2+1)) do
+    fuelCheck()
+    turtle.forward()
+  end
+  turtle.turnLeft()
+  turtle.forward()
+  turtle.turnLeft()
+end
+function nextRow(arg)
+  turtle.turnLeft()
+  turtle.forward()
+  turtle.turnRight()
+  local d = 1
+  d = d+arg
+  for i=1,d do
+    fuelCheck()
+    turtle.forward()
+  end
+  turtle.turnRight()
+  turtle.forward()
+  turtle.turnLeft()
+end
+local counter = 1
+while true do
+  local a1 = tArgs[1]
+  local a2 = tArgs[2]
+  local a3 = tArgs[3]
+
+  for i=1,(a1-1) do
+    logRow(a2,a3)
+    nextRow(a3)
+  end
+  logRow(a2,a3)
+  goBack(a1,a3)
+  unloadAndResuply(a1,a2)
+  
+  --Print some data and sleep
+  print("#######################################")
+  print("Nr of rows: "..a1)
+  print("Nr of trees/row:  "..a2)
+  print("Distance between trees: "..a3)
+  print("Farming loop has been run: "..counter.." Times")
+  print("Total blocks mined: "..blocksMined)
+  print("#######################################")
+  for i=5,1, -1 do
+    print("Sleeping for "..i.." minutes")
+    sleep(60)
+  end
+  print("Resuming program")
+  counter = counter+1
+end
