@@ -75,6 +75,8 @@ local depthCounter = 0
 local notDone = true
 
 for i=1,holesToMine do
+    depthCounter = 0
+    notDone = true
     turtle.digDown()
     turtle.down()
     turtle.digDown()
