@@ -1,80 +1,106 @@
 tArgs = {...}
-
+function emptyInventory(ignoreList)
+    local gotSpace = false
+    local selectedSlot = turtle.getSelectedSlot()
+    for i=ignoreList+1,15 do
+        if turtle.getItemCount(i) == 0 then
+            gotSpace = true
+            break
+        end
+    end
+    if not gotSpace then
+        print("Emptying!")
+        turtle.digUp()
+        turtle.select(16)
+        turtle.placeUp()
+        for i=ignoreList+1,15 do
+            turtle.select(i)
+            turtle.dropUp()
+        end
+        print("Emptied!")
+        turtle.select(16)
+        turtle.digUp()
+    end
+    turtle.select(selectedSlot)
+end
 function digRound(ignoreList)
  local dig = true
-	for i=1,4 do
-		dig = true
-		for j=1,ignoreList do
-			turtle.select(j)
-			if turtle.compare() then
-				dig = false
-			end
-		end
-		if dig then
-			turtle.dig()
-		end
-		turtle.turnRight()
-	end
+    for i=1,4 do
+        dig = true
+        for j=1,ignoreList do
+            turtle.select(j)
+            if turtle.compare() then
+                dig = false
+            end
+        end
+        if dig then
+            emptyInventory(ignoreList)
+            turtle.dig()
+        end
+        turtle.turnRight()
+    end
 end
 function tryMoveForward()
-	while not turtle.forward() do
-		turtle.dig()
-	end
+    while not turtle.forward() do
+        turtle.dig()
+    end
 end
 function tryDigDown()
-	turtle.select(1)
-	if not turtle.digDown() then
-		if turtle.detectDown() then
-			return false
-		end
-	end
-	return true
+    turtle.select(1)
+    if not turtle.digDown() then
+        if turtle.detectDown() then
+            return false
+        end
+    end
+    return true
 end
 function tryMoveUp()
-	while not turtle.up() do
-		turtle.digUp()
-	end
+    while not turtle.up() do
+        turtle.digUp()
+    end
 end
 function reposition()
-	tryMoveForward()
-	tryMoveForward()
-	turtle.turnRight()
-	tryMoveForward()
-	turtle.turnLeft()
+    tryMoveForward()
+    tryMoveForward()
+    turtle.turnRight()
+    tryMoveForward()
+    turtle.turnLeft()
 end
 
 -- MAIN PROGRAM STARTS HERE --
 
 ignoreCount = tArgs[1]
+holesToMine = tArgs[2]
 local depthCounter = 0
 local notDone = true
 
+for i=1,holesToMine do
+    turtle.digDown()
+    turtle.down()
+    turtle.digDown()
+    turtle.down()
+    turtle.select(1)
+    turtle.placeUp()
+    while notDone do
+        if not tryDigDown() then
+            notDone = false
+        end
+        turtle.down()
+        digRound(ignoreCount)
+        depthCounter = depthCounter + 1
+    end
+    turtle.up()
+    turtle.up()
+    turtle.up()
+    depthCounter = depthCounter-3
+    reposition()
+    for i=1,depthCounter do
+        digRound(ignoreCount)
+        tryMoveUp()
+    end
+    turtle.up()
 
-turtle.digDown()
-turtle.down()
-turtle.digDown()
-turtle.down()
-turtle.select(1)
-turtle.placeUp()
-while notDone do
-	if not tryDigDown() then
-		notDone = false
-	end
-	turtle.down()
-	digRound(ignoreCount)
-	depthCounter = depthCounter + 1
+    turtle.select(1)
+    turtle.placeDown()
+    reposition()
 end
-turtle.up()
-turtle.up()
-turtle.up()
-depthCounter = depthCounter-3
-reposition()
-for i=1,depthCounter do
-	digRound(ignoreCount)
-	tryMoveUp()
-end
-turtle.up()
-
-turtle.select(1)
-turtle.placeDown()
-reposition()
